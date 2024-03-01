@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset=utf-8>
+    <title>Index of madefor.cc</title>
+    <meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport>
+    <meta content="A list of every site registered in madefor.cc" name=description>
+    <!--    <link rel="icon" type="image/png" href="../favicon.png"/>-->
+    <!--    <meta property="og:image" content="https://wildfrost.jakobt.dev/old/assets/wildfrost_modding_7.png">-->
+    <!--    <meta name="twitter:image" content="https://wildfrost.jakobt.dev/old/assets/wildfrost_modding_7.png">-->
+    <style>
+        h1 { margin: 1em 0 1.5em 0;}
+        details {margin: 24px 0 32px 0;}
+        html {
+            background-color:#f4f5f7;
+            font-family: sans-serif;
+            text-align: center;
+        }
+        .block {
+            text-align: left;
+            border: 1px solid black;
+            padding: 6px;
+            width: 40%;
+            margin: 0 30%;
+
+        }
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            margin: 0 10%;
+        }
+        td {
+            border: 1px solid black;
+            padding: 6px;
+        }
+        td:nth-child(2) {
+            text-align: left;
+        }
+        td:nth-child(3) {
+            text-align: right;
+            font-style: italic;
+            font-size: 14px;
+        }
+        td:nth-child(3) a {
+            color: black;
+            text-decoration: none;
+        }
+        td:nth-child(3) a:hover {
+            text-decoration: underline;
+        }
+        tr:nth-child(even) {
+            background-color: #ddd;
+        }
+    </style>
+    <script>
+        main();
+
+        async function main() {
+            let response = await fetch("https://raw.githubusercontent.com/SquidDev-CC/madefor.cc/dev/dns/domains.py");
+            if (!response.ok)
+                return;
+
+            let text = await response.text();
+            let start = text.search("\"[a-z0-9_-]+\": ?{");
+
+            if (start === -1)
+                return;
+
+            let jsonText = "{" + text.substring(start).replaceAll("\n","").trim();
+            document.getElementById("debugRaw").innerHTML = jsonText;
+
+            if (jsonText.endsWith("},}"))
+                jsonText = jsonText.substring(0, jsonText.length-3) + "}}";
+
+            let json = JSON.parse(jsonText);
+            document.getElementById("debugJson").innerHTML = JSON.stringify(json, null, 2);
+
+            let table = "<tr><th>Domain</th><th>Description</th><th>CNAME</th></tr>";
+
+            const parser = new window.DOMParser();
+
+            for (let e of Object.keys(json)) {
+                if (e === "www")
+                    continue;
+                let description = "<i>No Description Available</i>";
+                try {
+                    let siteResponse = await fetch(`https://corsproxy.org/?https://${e}.madefor.cc`);
+                    if (siteResponse.ok) {
+                        description = getText( parser.parseFromString(await siteResponse.text(), "text/html") );
+                    }
+                    else {
+                        description = `<b><i>Site Unavaliable (${siteResponse.status})</i></b>`
+                    }
+                }
+                catch (error) {
+                    console.log(error)
+                    description = "Error: " + error;
+                }
+
+                table += `<tr><td><a href='https://${e}.madefor.cc'>${e}</a></td><td>${description}</td><td><a href="https://${json[e]["cname"]}">${json[e]["cname"]}</a></td></tr>`;
+                document.getElementById("sites").innerHTML = table;
+            }
+
+
+        }
+
+        function getText(info) {
+            let desc = "<i>No Description Available</i>";
+            if (info.querySelector('meta[property="og:description"]'))  desc = info.querySelector('meta[property="og:description"]').getAttribute('content');
+            else if (info.getElementsByName("description")?.length)  desc = info.getElementsByName("description")[0].getAttribute('content');
+            else if (info.querySelector('meta[property="og:title"]'))  desc = info.querySelector('meta[property="og:title"]').getAttribute('content');
+            else if (info.title?.length) desc = info.title;
+
+            return desc.toLowerCase().includes("redirect") ? "<i>No Description Available</i>" : desc;
+        }
+
+    </script>
+</head>
+<body>
+
+
+<h1><u>Index for madefor.cc</u></h1>
+<table>
+    <tbody id="sites">
+    </tbody>
+</table>
+<p>
+    Page by <a href="https://jakobt.dev">Jakobt.dev</a>
+    | <a href="https://github.com/Minenash/index.madefor.cc">Source</a>
+    | <a href="https://madefor.cc">madefor.cc</a>
+</p>
+<details>
+    <summary>Debug Info</summary>
+    <pre class="block"><code id="debugJson"></code></pre>
+    <br>
+    <div class="block"><code id="debugRaw"></code></div>
+</details>
+
+</body>
+</html>
