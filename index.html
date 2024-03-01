@@ -16,18 +16,42 @@
             font-family: sans-serif;
             text-align: center;
         }
+
+        body {
+            width: 80%;
+            margin: 0 10%;
+            @media screen and (min-width: 1920px) {
+                max-width: 1536px;
+                margin-left: calc(calc(100vw - 1536px) / 2);
+            }
+            @media screen and (max-width: 1280px) {
+                width: 90%;
+                margin: 0 5%;
+            }
+        }
+        @media screen and (max-width: 640px) {
+            td:nth-child(3) { display: none; }
+            th:nth-child(3) { display: none; }
+        }
+        @media screen and (max-width: 480px) {
+            td:nth-child(1) {
+                max-width: 25vw;
+                overflow: clip;
+                text-overflow: ellipsis;
+            }
+        }
+        
         .block {
             text-align: left;
             border: 1px solid black;
             padding: 6px;
-            width: 40%;
-            margin: 0 30%;
+            width: 50%;
+            margin: 0 25%;
 
         }
         table {
             border-collapse: collapse;
-            width: 80%;
-            margin: 0 10%;
+            
         }
         td {
             border: 1px solid black;
