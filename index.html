@@ -108,7 +108,7 @@
                     continue;
                 let description = "<i>No Description Available</i>";
                 try {
-                    let siteResponse = await fetch(`https://crossorigin.me/https://${e}.madefor.cc`);
+                    let siteResponse = await fetch(`https://corsproxy.io/?https://${e}.madefor.cc`);
                     if (siteResponse.ok) {
                         description = getText( parser.parseFromString(await siteResponse.text(), "text/html") );
                     }
